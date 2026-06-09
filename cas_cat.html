@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Code Art Studio Export</title>
+<style>
+body { margin: 0; background: #fafaf7; height: 100vh; }
+.artwork { position: relative; width: 100%; height: 100vh; }
+.artwork {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.shape-30 {
+  position: absolute;
+  left: 385px;
+  top: 236px;
+  width: 383px;
+  height: 264px;
+  background: #d4b8f0;
+  border-radius: 50%;
+}
+
+.shape-9 {
+  position: absolute;
+  left: 223px;
+  top: 235px;
+  width: 225px;
+  height: 151px;
+  background: #d4b8f0;
+}
+
+.shape-10 {
+  position: absolute;
+  left: 223px;
+  top: 149px;
+  width: 98px;
+  height: 86px;
+  background: #d4b8f0;
+  clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+}
+
+.shape-11 {
+  position: absolute;
+  left: 351px;
+  top: 149px;
+  width: 98px;
+  height: 86px;
+  background: #d4b8f0;
+  clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+}
+
+.shape-12 {
+  position: absolute;
+  left: 293px;
+  top: 316px;
+  width: 86px;
+  height: 56px;
+  background: #b3f0d4;
+  clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+  transform: rotate(180deg);
+}
+
+.shape-13 {
+  position: absolute;
+  left: 245px;
+  top: 180px;
+  width: 54px;
+  height: 56px;
+  background: #e8d4ff;
+  clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+}
+
+.shape-14 {
+  position: absolute;
+  left: 373px;
+  top: 180px;
+  width: 54px;
+  height: 56px;
+  background: #e8d4ff;
+  clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+}
+
+.shape-15 {
+  position: absolute;
+  left: 227px;
+  top: 262px;
+  width: 89px;
+  height: 52px;
+  background: #b3f0d4;
+  border-radius: 50%;
+}
+
+.shape-16 {
+  position: absolute;
+  left: 355px;
+  top: 262px;
+  width: 89px;
+  height: 52px;
+  background: #b3f0d4;
+  border-radius: 50%;
+}
+
+.shape-18 {
+  position: absolute;
+  left: 283px;
+  top: 330px;
+  width: 98px;
+  height: 4px;
+  background: #fff0a0;
+  transform: rotate(-165.5deg);
+  transform-origin: left center;
+  border-radius: 4px;
+}
+
+.shape-23 {
+  position: absolute;
+  left: 189px;
+  top: 338px;
+  width: 85px;
+  height: 4px;
+  background: #fff0a0;
+  transform: rotate(1.8deg);
+  transform-origin: left center;
+  border-radius: 4px;
+}
+
+.shape-24 {
+  position: absolute;
+  left: 202px;
+  top: 373px;
+  width: 78px;
+  height: 4px;
+  background: #fff0a0;
+  transform: rotate(-15.6deg);
+  transform-origin: left center;
+  border-radius: 4px;
+}
+
+.shape-25 {
+  position: absolute;
+  left: 380px;
+  top: 332px;
+  width: 91px;
+  height: 4px;
+  background: #fff0a0;
+  transform: rotate(-16.2deg);
+  transform-origin: left center;
+  border-radius: 4px;
+}
+
+.shape-26 {
+  position: absolute;
+  left: 378px;
+  top: 341px;
+  width: 84px;
+  height: 4px;
+  background: #fff0a0;
+  transform: rotate(4.2deg);
+  transform-origin: left center;
+  border-radius: 4px;
+}
+
+.shape-27 {
+  position: absolute;
+  left: 375px;
+  top: 357px;
+  width: 100px;
+  height: 4px;
+  background: #fff0a0;
+  transform: rotate(12.9deg);
+  transform-origin: left center;
+  border-radius: 4px;
+}
+
+.shape-28 {
+  position: absolute;
+  left: 240px;
+  top: 275px;
+  width: 32px;
+  height: 26px;
+  background: #fff0a0;
+  border-radius: 50%;
+}
+
+.shape-29 {
+  position: absolute;
+  left: 403px;
+  top: 275px;
+  width: 32px;
+  height: 26px;
+  background: #fff0a0;
+  border-radius: 50%;
+}
+
+.shape-31 {
+  position: absolute;
+  left: 449px;
+  top: 432px;
+  width: 39px;
+  height: 159px;
+  background: #d4b8f0;
+}
+
+.shape-32 {
+  position: absolute;
+  left: 400px;
+  top: 400px;
+  width: 39px;
+  height: 159px;
+  background: #d4b8f0;
+}
+
+.shape-33 {
+  position: absolute;
+  left: 704px;
+  top: 402px;
+  width: 39px;
+  height: 189px;
+  background: #d4b8f0;
+}
+
+.shape-34 {
+  position: absolute;
+  left: 640px;
+  top: 400px;
+  width: 39px;
+  height: 159px;
+  background: #d4b8f0;
+}
+</style>
+</head>
+<body>
+<div class="artwork">
+  <div class="shape-30"></div>
+  <div class="shape-9"></div>
+  <div class="shape-10"></div>
+  <div class="shape-11"></div>
+  <div class="shape-12"></div>
+  <div class="shape-13"></div>
+  <div class="shape-14"></div>
+  <div class="shape-15"></div>
+  <div class="shape-16"></div>
+  <div class="shape-18"></div>
+  <div class="shape-23"></div>
+  <div class="shape-24"></div>
+  <div class="shape-25"></div>
+  <div class="shape-26"></div>
+  <div class="shape-27"></div>
+  <div class="shape-28"></div>
+  <div class="shape-29"></div>
+  <div class="shape-31"></div>
+  <div class="shape-32"></div>
+  <div class="shape-33"></div>
+  <div class="shape-34"></div>
+  <svg class="shape-36" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none"><path d="M747 323 Q747 323 746 322 Q745 322 745 323 Q745 325 747 328 Q748 330 750 332 Q751 333 753 335 Q755 337 757 339 Q758 340 760 342 Q763 343 764 345 Q765 346 766 347 Q768 348 769 349 Q770 350 771 351 Q772 351 773 352 Q775 352 776 352 Q778 352 782 353 Q785 354 788 355 Q791 357 795 357 Q798 358 802 358 Q805 359 808 359 Q810 359 812 359 Q814 359 817 359 Q821 359 824 358 Q827 358 829 357 Q831 357 833 355 Q834 354 835 353 Q836 352 836 351 Q836 350 838 347 Q839 345 839 343 Q839 342 839 340 Q840 337 840 335 Q841 334 841 332 Q841 329 841 328 Q841 326 841 323 Q841 320 841 316 Q841 312 840 310 Q840 309 839 307 Q839 305 838 304 Q838 302 836 301 Q835 300 834 298 Q833 297 832 296 Q831 295 828 292 Q826 289 823 287 Q820 285 815 281 Q810 277 809 274 Q807 272 806 270 Q805 268 804 267 Q803 266 801 265 Q798 264 796 264 Q794 263 792 264 Q791 264 790 265 Q789 265 786 267 Q783 270 781 272 Q779 274 777 276 Q775 278 773 279 Q772 280 771 282 Q770 283 770 284 Q769 285 770 286 Q770 287 771 288 Q772 289 773 289 Q775 289 775 290 Q776 291 777 292 Q778 292 779 293 Q780 293 782 293 Q783 293 785 293 Q788 293 789 293" stroke="#fff0a0" stroke-width="20" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="1"/></svg>
+  <svg class="shape-37" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none"><path d="M524 98 Q524 98 523 98 Q522 98 521 98 Q520 98 517 98 Q515 98 513 98 Q511 98 509 98 Q507 98 506 98 Q505 98 503 99 Q501 100 499 100 Q496 101 495 101 Q494 101 492 102 Q491 102 489 104 Q486 105 484 107 Q482 109 481 110 Q481 111 481 112 Q481 113 481 115 Q482 117 482 118 Q482 119 483 120 Q484 122 485 123 Q485 124 486 125 Q487 127 489 127 Q490 128 491 128 Q493 129 494 129 Q495 129 496 129 Q497 129 499 129 Q501 129 502 129 Q503 129 504 129 Q505 129 506 128 Q507 127 509 127 Q510 127 511 127 Q513 127 514 126 Q515 125 515 124" stroke="#ffd4b3" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="1"/></svg>
+  <svg class="shape-39" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none"><path d="M563 87 Q563 87 564 88 Q564 89 564 90 Q564 91 564 92 Q564 93 564 95 Q563 97 563 99 Q563 101 563 103 Q563 104 563 105 Q563 107 562 108 Q562 109 562 110 Q562 112 562 113 Q562 114 561 117 Q561 119 561 118 Q561 117 561 115 Q561 114 561 113 Q561 112 561 111 Q562 110 562 108 Q563 107 563 105 Q563 103 563 102 Q563 100 563 98 Q563 97 563 95 Q563 94 562 93 Q562 91 563 90 Q564 89 565 89 Q566 89 567 89 Q569 89 570 89 Q571 89 572 89 Q573 89 575 88 Q576 88 577 88 Q579 89 580 89 Q582 89 583 90 Q584 91 584 93 Q584 94 584 95 Q584 97 584 98 Q583 99 583 100 Q583 102 582 104 Q581 107 580 108 Q579 110 577 112 Q575 113 574 113 Q573 113 571 114 Q569 115 567 115 Q566 115 565 116" stroke="#b3d4ff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="1"/></svg>
+  <svg class="shape-40" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none"><path d="M600 109 Q600 109 601 108 Q602 108 602 107 Q603 105 604 104 Q604 102 604 101 Q604 100 604 98 Q604 97 604 94 Q604 92 603 92 Q602 91 600 92 Q599 92 596 94 Q594 95 594 97 Q593 98 592 99 Q591 100 590 100 Q589 101 587 102 Q586 103 585 104 Q584 104 584 105 Q584 107 584 108 Q584 109 585 110 Q585 111 586 113 Q587 114 589 115 Q590 117 591 117 Q592 118 594 118 Q595 119 597 119 Q599 119 600 119 Q601 119 602 119" stroke="#ffc8e8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="1"/></svg>
+  <svg class="shape-41" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none"><path d="M527 157 Q527 157 529 157 Q530 157 531 157 Q532 158 533 159 Q534 160 535 161 Q536 162 537 163 Q537 164 538 166 Q539 168 539 169 Q540 170 540 171 Q540 172 539 173 Q539 174 538 175 Q537 177 536 177 Q535 178 534 178 Q533 178 531 178 Q530 179 529 179 Q527 179 526 178 Q524 178 522 178 Q521 178 519 177 Q517 175 517 174 Q516 173 516 172 Q516 171 516 170 Q516 169 517 167 Q517 165 518 164 Q519 163 520 162 Q521 160 521 159 Q521 158 522 157 Q523 155 524 155 Q525 155 526 155 Q527 155 529 156 Q531 157 532 157 Q533 158 534 158 Q535 159 536 160 Q536 161 537 162 Q537 163 537 164 Q537 165 539 167 Q540 168 541 170 Q543 172 545 173 Q546 173 547 174 Q549 174 550 174" stroke="#c8eaff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="1"/></svg>
+  <svg class="shape-42" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none"><path d="M557 157 Q557 157 558 159 Q559 161 559 162 Q559 163 559 164 Q559 165 558 164 Q557 163 557 162 Q556 160 556 159 Q556 158 556 157 Q555 155 556 154 Q556 152 556 150 Q556 149 557 148 Q559 147 560 146 Q561 145 562 144 Q563 143 565 143 Q567 142 569 142 Q570 142 571 143 Q572 143 573 144 Q574 144 575 145 Q575 147 576 147" stroke="#fff0a0" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="1"/></svg>
+  <svg class="shape-43" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none"><path d="M597 134 Q597 134 597 137 Q597 139 597 140 Q596 142 596 143 Q596 144 596 146 Q596 148 596 149 Q596 150 596 153 Q596 155 596 157 Q596 159 596 160 Q596 162 596 163 Q596 164 596 165 Q596 167 597 168 Q597 169 597 168" stroke="#e8d4ff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="1"/></svg>
+  <svg class="shape-44" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none"><path d="M585 149 Q585 149 587 149 Q589 149 590 149 Q592 150 593 150 Q594 150 595 150 Q596 150 597 149 Q599 149 600 148 Q601 148 602 148 Q604 149 605 149" stroke="#d4b8f0" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="1"/></svg>
+  <svg class="shape-45" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none"><path d="M577 185 Q577 185 575 186 Q573 187 572 187 Q571 188 567 188 Q564 189 563 189 Q562 190 561 190 Q560 191 559 192 Q557 192 557 193 Q556 194 557 196 Q557 198 558 199 Q559 200 560 201 Q561 202 561 204 Q562 205 563 206 Q564 207 565 207 Q566 207 567 207 Q569 207 570 207 Q571 207 572 206 Q573 205 574 205 Q575 205 577 205 Q579 205 580 205 Q581 205 584 205 Q586 205 589 205 Q592 205 594 206 Q596 207 598 207 Q600 207 601 207 Q602 208 602 209 Q603 210 603 211 Q603 212 602 214 Q602 215 601 217 Q600 218 599 219 Q597 220 596 221 Q594 222 593 222 Q592 222 591 223 Q590 224 589 224 Q587 224 586 225 Q584 225 583 225 Q582 225 581 225 Q580 225 579 225 Q577 225 576 225 Q575 224 574 225 Q573 225 572 225" stroke="#d4f0b3" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="1"/></svg>
+  <svg class="shape-46" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none"><path d="M606 186 Q606 186 607 186 Q609 187 610 187 Q611 187 612 187 Q613 187 615 187 Q616 187 617 187 Q619 187 621 187 Q622 188 623 188 Q625 188 626 188 Q627 188 628 188 Q629 188 630 188 Q631 188 632 187 Q633 187 635 187 Q636 187 637 187 Q638 187 640 187 Q641 187 642 187 Q643 187 645 187 Q646 187 646 186" stroke="#b3f0d4" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="1"/></svg>
+  <svg class="shape-47" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none"><path d="M624 189 Q624 189 625 190 Q625 191 625 192 Q625 193 625 194 Q625 195 625 198 Q624 200 624 201 Q624 203 624 205 Q624 206 624 208 Q624 210 624 211 Q624 212 624 214 Q624 215 625 216 Q625 218 626 219 Q627 220 627 221 Q628 222 628 223 Q628 224 628 226 Q629 228 629 229 Q629 230 628 229" stroke="#b3f0d4" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="1"/></svg>
+  <svg class="shape-48" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none"><path d="M657 191 Q657 191 657 192 Q657 193 657 194 Q657 195 657 196 Q656 197 656 200 Q655 202 655 203 Q654 204 655 205 Q655 206 655 207 Q655 209 655 210 Q654 212 654 213 Q654 214 654 216 Q654 217 655 219 Q655 220 656 221 Q656 223 657 224 Q657 225 658 227 Q659 229 659 230 Q660 231 661 231 Q662 231 663 231 Q664 232 665 232 Q666 233 667 234 Q667 235 669 235 Q670 234 671 234 Q673 233 675 232 Q677 232 679 232 Q681 232 681 231 Q682 230 683 229 Q684 227 685 227 Q686 226 686 225 Q686 224 687 223 Q687 222 688 221 Q689 220 689 219 Q690 217 691 216 Q692 215 694 215 Q696 214 697 214 Q699 213 700 212 Q701 211 701 209 Q701 207 701 206 Q701 205 701 204 Q701 203 701 202 Q702 201 701 202 Q700 203 700 202 Q701 201 701 200 Q702 199 701 199" stroke="#fff0a0" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="1"/></svg>
+  <svg class="shape-49" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none"><path d="M696 247 Q696 247 697 246 Q698 245 699 244 Q699 242 700 241 Q701 240 701 239 Q701 238 701 237 Q701 236 701 235 Q701 234 701 232 Q702 230 703 229 Q704 228 705 227 Q706 226 709 224 Q712 222 714 220 Q716 218 717 217 Q718 216 722 214 Q725 211 726 210 Q727 208 728 207 Q728 206 729 207 Q731 208 732 208 Q733 208 733 209 Q734 210 734 211 Q735 212 735 214 Q735 215 736 216 Q736 217 737 218 Q737 219 737 220 Q737 221 737 222 Q736 224 736 225 Q736 227 736 228 Q736 229 736 230 Q735 231 735 232 Q735 234 734 235 Q733 237 732 239 Q731 240 729 241 Q728 242 728 244 Q727 245 726 245 Q724 246 723 247 Q722 248 721 248 Q719 248 718 249 Q717 249 716 249 Q715 249 714 249 Q713 249 712 249 Q711 249 709 249 Q707 249 706 249" stroke="#fff0a0" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="1"/></svg>
+  <svg class="shape-50" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none"><path d="M731 265 Q731 265 731 263 Q731 261 732 260 Q732 259 733 258 Q733 257 734 256 Q736 256 736 255 Q737 254 738 253 Q739 252 741 252 Q742 251 744 250 Q746 249 747 249 Q748 248 749 247 Q750 247 752 246 Q753 245 755 244 Q757 244 758 243 Q759 242 762 241 Q764 239 767 238 Q770 237 771 236 Q771 235 773 234 Q774 232 776 232" stroke="#ffd4b3" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="1"/></svg>
+  <svg class="shape-51" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none"><path d="M532 112 Q532 112 533 111 Q535 110 536 110 Q537 109 537 109 Q538 108 540 108 Q541 109 542 109 Q543 110 544 110 Q545 110 546 111 Q548 111 549 112 Q550 113 550 115 Q551 116 551 117 Q551 118 550 120 Q550 121 549 122 Q548 124 547 125 Q546 125 545 126 Q544 126 543 127 Q542 127 540 127 Q539 126 538 126 Q537 126 536 125 Q535 124 534 123 Q533 121 533 120 Q532 119 532 118" stroke="#b3f0d4" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="1"/></svg>
+</div>
+</body>
+</html>
