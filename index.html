@@ -295,12 +295,10 @@ header{height:var(--hh);flex-shrink:0;display:flex;align-items:center;gap:8px;pa
 </head>
 <body>
 
-<!-- LANDING -->
 <div id="landing">
   <div class="l-bg"></div>
   <canvas id="lcanvas"></canvas>
 
-  <!-- Scattered background shapes (SVG doodles) -->
   <svg class="l-shape" style="top:6%;left:5%;width:90px;opacity:.55;transform:rotate(-12deg)" viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect x="4" y="4" width="82" height="82" rx="14" fill="#fff0a0" stroke="#1a1a1a" stroke-width="2.5"/>
   </svg>
@@ -326,8 +324,6 @@ header{height:var(--hh);flex-shrink:0;display:flex;align-items:center;gap:8px;pa
     <ellipse cx="18" cy="18" rx="14" ry="14" fill="#fff0a0" stroke="#1a1a1a" stroke-width="2"/>
   </svg>
 
-  <!-- Wiggly arrow pointing at the button (drawn in canvas) -->
-
   <div class="l-content">
     <div class="l-card">
       <div class="l-badge">Creative Code Platform</div>
@@ -351,7 +347,6 @@ header{height:var(--hh);flex-shrink:0;display:flex;align-items:center;gap:8px;pa
   </div>
 </div>
 
-<!-- APP -->
 <div id="app">
   <header>
     <div class="logo">CAS</div>
@@ -359,6 +354,7 @@ header{height:var(--hh);flex-shrink:0;display:flex;align-items:center;gap:8px;pa
     <button class="hbtn" id="newBtn">New</button>
     <button class="hbtn gtgl on" id="gridBtn">Grid</button>
     <button class="hbtn gtgl on" id="snapBtn">Snap</button>
+    <button class="hbtn gtgl on" id="ebBtn">Boundary</button>
     <div class="hdiv"></div>
     <button class="hbtn" id="undoBtn" style="opacity:0.35" title="Undo (Ctrl+Z)">Undo</button>
     <button class="hbtn" id="redoBtn" style="opacity:0.35" title="Redo (Ctrl+Y)">Redo</button>
@@ -445,7 +441,7 @@ header{height:var(--hh);flex-shrink:0;display:flex;align-items:center;gap:8px;pa
 <div id="toast"></div>
 
 <script>
-// ── LANDING ──
+
 (function(){
   const lc=document.getElementById('lcanvas'),ctx=lc.getContext('2d');
   let W,H;
@@ -472,33 +468,25 @@ document.getElementById('startBtn').addEventListener('click',()=>{
   setTimeout(()=>{document.getElementById('landing').style.display='none';document.getElementById('app').classList.add('on');initApp();},420);
 });
 
-// ── STATE ──
 let canvas,ctx;
 let shapes=[],selId=null,tool='select',shapeCounter=0;
 let zoom=1,panX=0,panY=0;
-// drawing new shape
 let drawing=false,dragShape=null,drawStart=null;
-// moving
 let dragging=false,dragOffset={x:0,y:0};
-// resizing
 let resizing=false,resHandle=null,resSnap=null,resStart=null;
-// rotating
 let rotating=false,rotSnap=0,rotCenter=null,rotStartAngle=0;
-// freehand
 let fhDrawing=false,fhPts=[],fhColor='#1a1a1a';
-// text
 let textPending=null;
-// clipboard
 let clipboard=null;
-// undo/redo
 let history=[],historyIdx=-1;
 const HIST_MAX=60;
-// snapping
 let snapOn=true;
-const SNAP_GRID=16;   // grid snap interval in world px
-const SNAP_DIST=8;    // pixel threshold to snap to shape edges
-const SNAP_SIZE=8;    // size snapping interval (widths/heights snap to multiples of this)
+const SNAP_GRID=16;
+const SNAP_DIST=8;
+const SNAP_SIZE=8;
 let gridOn=true;
+let exportBound={x:50,y:50,w:800,h:600,visible:true};
+let ebDragging=false,ebResizing=false,ebHandle=null,ebDragOff={x:0,y:0},ebSnap=null,ebResStart=null;
 
 const PC=['#ffb3c6','#d4b8f0','#b3d4ff','#b3f0d4','#fff0a0','#ffd4b3','#e8d4ff','#c8eaff','#ffc8e8','#d4f0b3'];
 const ICONS={rect:'[ ]',circle:'( )',triangle:'/\\',polygon:'<>',line:'/',freehand:'~',text:'T',arc:'arc'};
@@ -511,9 +499,7 @@ let curFont='Patrick Hand',curFontSize=28,curTextColor='#1a1a1a';
 function rnd(){return PC[Math.floor(Math.random()*PC.length)];}
 function newId(){return 'shape-'+(++shapeCounter);}
 
-// ── HISTORY (undo/redo) ──
 function saveHistory(){
-  // Truncate redo branch
   history.splice(historyIdx+1);
   history.push(JSON.stringify(shapes));
   if(history.length>HIST_MAX) history.shift();
@@ -538,15 +524,11 @@ function updateUndoRedoBtns(){
   if(r)r.style.opacity=historyIdx<history.length-1?'1':'0.35';
 }
 
-// ── SNAPPING ──
-// Returns snapped world coord {x,y} for a moving shape origin
 function snapPoint(wx,wy,skipId){
   if(!snapOn) return{x:wx,y:wy};
   let x=wx,y=wy;
-  // 1. Grid snap
   x=Math.round(x/SNAP_GRID)*SNAP_GRID;
   y=Math.round(y/SNAP_GRID)*SNAP_GRID;
-  // 2. Shape-edge snap: collect candidate edges from all other shapes
   const candidates=shapes.filter(s=>s.id!==skipId&&s.visible);
   let bestDx=SNAP_DIST/zoom,bestDy=SNAP_DIST/zoom;
   let snapX=null,snapY=null;
@@ -561,20 +543,15 @@ function snapPoint(wx,wy,skipId){
   if(snapY!==null) y=snapY;
   return{x,y};
 }
-// Snap for line endpoints
-function snapXY(v,axis,skipId){
+function snapXY(v){
   if(!snapOn) return v;
-  const snapped=axis==='x'?Math.round(v/SNAP_GRID)*SNAP_GRID:Math.round(v/SNAP_GRID)*SNAP_GRID;
-  return snapped;
+  return Math.round(v/SNAP_GRID)*SNAP_GRID;
 }
-
-// Snap a size (width/height/radius) to the nearest SNAP_SIZE multiple
 function snapSize(v){
   if(!snapOn) return Math.max(1,v);
   return Math.max(SNAP_SIZE, Math.round(v/SNAP_SIZE)*SNAP_SIZE);
 }
 
-// ── ALIGNMENT ──
 function alignShapes(mode){
   if(shapes.length<2){showToast('Need 2+ shapes to align');return;}
   saveHistory();
@@ -584,8 +561,6 @@ function alignShapes(mode){
     if(mode==='right') return ab.x+ab.w>bb.x+bb.w?a:b;
     if(mode==='top') return ab.y<bb.y?a:b;
     if(mode==='bottom') return ab.y+ab.h>bb.y+bb.h?a:b;
-    if(mode==='cx') return a; // use first for center
-    if(mode==='cy') return a;
     return a;
   });
   const rb=getBounds(ref);
@@ -596,18 +571,8 @@ function alignShapes(mode){
     else if(mode==='right'){const d=(rb.x+rb.w)-(b.x+b.w);s.x+=d;}
     else if(mode==='top'){const d=rb.y-b.y;s.y+=d;}
     else if(mode==='bottom'){const d=(rb.y+rb.h)-(b.y+b.h);s.y+=d;}
-    else if(mode==='cx'){
-      // align all centers to canvas horizontal center
-      const canvasCx=canvas.width/(2*zoom)-panX/zoom;
-      const d=canvasCx-b.cx; s.x+=d;
-    }
-    else if(mode==='cy'){
-      const canvasCy=canvas.height/(2*zoom)-panY/zoom;
-      const d=canvasCy-b.cy; s.y+=d;
-    }
-    else if(mode==='distH'){/* handled separately */}
-    // line/freehand adjustments
-    if(s.type==='line'){s.x2+=(s.x-(s.x-(s.x2-s.x)));/* already adjusted via s.x */}
+    else if(mode==='cx'){const canvasCx=canvas.width/(2*zoom)-panX/zoom;const d=canvasCx-b.cx;s.x+=d;}
+    else if(mode==='cy'){const canvasCy=canvas.height/(2*zoom)-panY/zoom;const d=canvasCy-b.cy;s.y+=d;}
   });
   if(mode==='distH'||mode==='distV') distributeShapes(mode);
   render();renderLayers();renderProps();renderCode(true);
@@ -630,7 +595,6 @@ function distributeShapes(mode){
   });
 }
 
-// ── INIT ──
 function initApp(){
   canvas=document.getElementById('canvas');ctx=canvas.getContext('2d');
   resizeCanvas();
@@ -641,7 +605,7 @@ function initApp(){
   canvas.addEventListener('wheel',onWheel,{passive:false});
   setupTextOverlay();
   setupToolbar();setupHeader();setupSidebar();setupKeyboard();
-  saveHistory(); // seed empty state
+  saveHistory();
   render();renderLayers();renderCode();
 }
 function resizeCanvas(){
@@ -649,11 +613,9 @@ function resizeCanvas(){
   canvas.width=cc.offsetWidth;canvas.height=cc.offsetHeight;render();
 }
 
-// ── COORD UTILS ──
 function toWorld(sx,sy){return{x:(sx-panX)/zoom,y:(sy-panY)/zoom};}
 function canvasPos(e){const r=canvas.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
 
-// ── BOUNDING BOX (axis-aligned, unrotated local space) ──
 function getBounds(s){
   if(s.type==='rect') return{x:s.x,y:s.y,w:s.w,h:s.h,cx:s.x+s.w/2,cy:s.y+s.h/2};
   if(s.type==='circle') return{x:s.x-s.rx,y:s.y-s.ry,w:s.rx*2,h:s.ry*2,cx:s.x,cy:s.y};
@@ -680,7 +642,6 @@ function getBounds(s){
   return{x:s.x||0,y:s.y||0,w:10,h:10,cx:(s.x||0)+5,cy:(s.y||0)+5};
 }
 
-// Convert world point into shape's local (un-rotated) space
 function worldToLocal(s,wx,wy){
   const b=getBounds(s);const rot=s.rotation||0;
   if(!rot)return{x:wx,y:wy};
@@ -688,7 +649,6 @@ function worldToLocal(s,wx,wy){
   return{x:b.cx+dx*c-dy*ss,y:b.cy+dx*ss+dy*c};
 }
 
-// ── HIT TEST (works in local space) ──
 function hitTest(s,wx,wy){
   const lp=worldToLocal(s,wx,wy);const lx=lp.x,ly=lp.y;
   const b=getBounds(s);
@@ -696,8 +656,6 @@ function hitTest(s,wx,wy){
   if(s.type==='circle') return Math.hypot(lx-s.x,ly-s.y)<=Math.max(s.rx,s.ry);
   if(s.type==='triangle'){
     const rx=s.rx||s.r||1, ry=s.ry||s.r||1;
-    // Vertices: top=(s.x, s.y-ry), br=(s.x+rx, s.y+ry), bl=(s.x-rx, s.y+ry)
-    // Point-in-triangle using barycentric coords
     const x0=s.x,y0=s.y-ry, x1=s.x+rx,y1=s.y+ry, x2=s.x-rx,y2=s.y+ry;
     const dX=lx-x2,dY=ly-y2,dX21=x2-x1,dY12=y1-y2;
     const D=dY12*(x0-x2)+dX21*(y0-y2);
@@ -736,12 +694,9 @@ function hitTest(s,wx,wy){
   return false;
 }
 
-// ── HANDLES ──
-// Returns {scale: [{id,wx,wy},...], rot:{wx,wy}}  in world space
 function getHandles(s){
   const b=getBounds(s);const rot=s.rotation||0;
   const hs=7/zoom;
-  // corner & edge points in local space
   const pts=[
     {id:'tl',lx:b.x,    ly:b.y},
     {id:'tc',lx:b.x+b.w/2,ly:b.y},
@@ -752,11 +707,9 @@ function getHandles(s){
     {id:'bc',lx:b.x+b.w/2,ly:b.y+b.h},
     {id:'br',lx:b.x+b.w,ly:b.y+b.h},
   ];
-  // rotate around center into world space
   const c=Math.cos(rot),ss=Math.sin(rot);
   function rotate(lx,ly){const dx=lx-b.cx,dy=ly-b.cy;return{wx:b.cx+dx*c-dy*ss,wy:b.cy+dx*ss+dy*c};}
   const scale=pts.map(p=>({...p,...rotate(p.lx,p.ly),hs}));
-  // rotation handle: above tc
   const rotLocal={lx:b.x+b.w/2,ly:b.y-28/zoom};
   const rotWorld=rotate(rotLocal.lx,rotLocal.ly);
   return{scale,rot:{...rotWorld,hs:hs*1.2},b};
@@ -770,20 +723,28 @@ function hitHandle(s,wx,wy){
   return null;
 }
 
-// ── MOUSE ──
 function onDown(e){
   if(e.button!==0)return;
   const sp=canvasPos(e),wp=toWorld(sp.x,sp.y);
 
-  if(tool==='text'){
-    commitText();
-    placeText(wp,sp);
-    return;
+  if(exportBound.visible&&tool==='select'){
+    const eb=exportBound;
+    const hs=8/zoom;
+    const corners=[{id:'br',x:eb.x+eb.w,y:eb.y+eb.h},{id:'tr',x:eb.x+eb.w,y:eb.y},{id:'bl',x:eb.x,y:eb.y+eb.h},{id:'tl',x:eb.x,y:eb.y},{id:'bc',x:eb.x+eb.w/2,y:eb.y+eb.h},{id:'tc',x:eb.x+eb.w/2,y:eb.y},{id:'ml',x:eb.x,y:eb.y+eb.h/2},{id:'mr',x:eb.x+eb.w,y:eb.y+eb.h/2}];
+    for(const c of corners){
+      if(Math.abs(wp.x-c.x)<=hs&&Math.abs(wp.y-c.y)<=hs){
+        ebResizing=true;ebHandle=c.id;ebResStart={...wp};ebSnap={...eb};
+        return;
+      }
+    }
+    if(wp.x>=eb.x&&wp.x<=eb.x+eb.w&&wp.y>=eb.y&&wp.y<=eb.y+eb.h){
+      ebDragging=true;ebDragOff={x:wp.x-eb.x,y:wp.y-eb.y};
+      return;
+    }
   }
-  if(tool==='freehand'){
-    fhDrawing=true;fhColor=rnd();fhPts=[{x:wp.x,y:wp.y}];
-    return;
-  }
+
+  if(tool==='text'){commitText();placeText(wp,sp);return;}
+  if(tool==='freehand'){fhDrawing=true;fhColor=rnd();fhPts=[{x:wp.x,y:wp.y}];return;}
   if(tool==='select'){
     const sel=shapes.find(s=>s.id===selId);
     if(sel){
@@ -814,7 +775,6 @@ function onDown(e){
     renderLayers();renderProps();render();
     return;
   }
-  // drawing
   drawing=true;drawStart={...wp};
   const id=newId(),color=rnd();
   if(tool==='rect') dragShape={id,type:'rect',x:wp.x,y:wp.y,w:1,h:1,fill:color,stroke:'',sw:0,opacity:1,cr:0,shadow:0,rotation:0,visible:true};
@@ -829,7 +789,6 @@ function onMove(e){
   const sp=canvasPos(e),wp=toWorld(sp.x,sp.y);
   const sel=shapes.find(s=>s.id===selId);
 
-  // cursor
   if(tool==='select'){
     if(sel&&!dragging&&!resizing&&!rotating){
       const hid=hitHandle(sel,wp.x,wp.y);
@@ -844,10 +803,25 @@ function onMove(e){
   }
 
   if(fhDrawing){
-    // throttle: only add point if moved enough
     const last=fhPts[fhPts.length-1];
     if(Math.hypot(wp.x-last.x,wp.y-last.y)>2)fhPts.push({x:wp.x,y:wp.y});
     render();return;
+  }
+  if(ebResizing){
+    const eb=exportBound,snap=ebSnap,h=ebHandle,dx=wp.x-ebResStart.x,dy=wp.y-ebResStart.y;
+    if(h==='tl'){eb.x=snap.x+dx;eb.y=snap.y+dy;eb.w=Math.max(40,snap.w-dx);eb.h=Math.max(40,snap.h-dy);}
+    if(h==='tr'){eb.y=snap.y+dy;eb.w=Math.max(40,snap.w+dx);eb.h=Math.max(40,snap.h-dy);}
+    if(h==='bl'){eb.x=snap.x+dx;eb.w=Math.max(40,snap.w-dx);eb.h=Math.max(40,snap.h+dy);}
+    if(h==='br'){eb.w=Math.max(40,snap.w+dx);eb.h=Math.max(40,snap.h+dy);}
+    if(h==='tc'){eb.y=snap.y+dy;eb.h=Math.max(40,snap.h-dy);}
+    if(h==='bc') eb.h=Math.max(40,snap.h+dy);
+    if(h==='ml'){eb.x=snap.x+dx;eb.w=Math.max(40,snap.w-dx);}
+    if(h==='mr') eb.w=Math.max(40,snap.w+dx);
+    render();updateEbInfo();return;
+  }
+  if(ebDragging){
+    exportBound.x=wp.x-ebDragOff.x;exportBound.y=wp.y-ebDragOff.y;
+    render();updateEbInfo();return;
   }
   if(rotating&&sel){
     const a=Math.atan2(wp.y-rotCenter.y,wp.x-rotCenter.x);
@@ -879,7 +853,6 @@ function onMove(e){
   if(dragShape.type==='rect'){
     dragShape.x=dx>=0?drawStart.x:wp.x;dragShape.y=dy>=0?drawStart.y:wp.y;
     dragShape.w=snapSize(Math.abs(dx)||1);dragShape.h=snapSize(Math.abs(dy)||1);
-    // keep origin anchored when snapping
     if(dx>=0) dragShape.x=drawStart.x; else dragShape.x=drawStart.x-dragShape.w;
     if(dy>=0) dragShape.y=drawStart.y; else dragShape.y=drawStart.y-dragShape.h;
   }
@@ -891,6 +864,8 @@ function onMove(e){
 }
 
 function onUp(){
+  if(ebResizing){ebResizing=false;ebHandle=null;ebSnap=null;ebResStart=null;return;}
+  if(ebDragging){ebDragging=false;return;}
   if(rotating){rotating=false;saveHistory();renderCode(true);renderProps();return;}
   if(resizing){resizing=false;resHandle=null;resSnap=null;resStart=null;saveHistory();renderCode(true);renderProps();return;}
   if(dragging){dragging=false;saveHistory();renderCode(true);return;}
@@ -916,35 +891,26 @@ function onUp(){
   dragShape=null;render();
 }
 
-// ── RESIZE ──
-// Each handle only moves the correct edge(s) — no cross-axis bleeding
 function applyResize(s,wp){
   const snap=resSnap,h=resHandle;
   const rot=snap.rotation||0;
-  // un-rotate the delta so we work in shape-local space
   const dx0=wp.x-resStart.x,dy0=wp.y-resStart.y;
   const c=Math.cos(-rot),ss=Math.sin(-rot);
   const dx=dx0*c-dy0*ss, dy=dx0*ss+dy0*c;
 
   if(s.type==='rect'){
-    // left edge
     if(h==='tl'||h==='ml'||h==='bl'){
       const newW=snapSize(Math.max(SNAP_SIZE,snap.w-dx));
       const moved=snap.w-newW;
-      s.w=newW;
-      s.x=snap.x+moved*Math.cos(rot);
-      s.y=snap.y+moved*Math.sin(rot);
+      s.w=newW;s.x=snap.x+moved*Math.cos(rot);s.y=snap.y+moved*Math.sin(rot);
     }
     if(h==='tr'||h==='mr'||h==='br') s.w=snapSize(Math.max(SNAP_SIZE,snap.w+dx));
-    // top edge
     if(h==='tl'||h==='tc'||h==='tr'){
       const newH=snapSize(Math.max(SNAP_SIZE,snap.h-dy));
       const moved=snap.h-newH;
-      s.h=newH;
-      s.x=snap.x-moved*Math.sin(rot);
-      s.y=snap.y+moved*Math.cos(rot);
+      s.h=newH;s.x=snap.x-moved*Math.sin(rot);s.y=snap.y+moved*Math.cos(rot);
       if(h==='tl'||h==='tr'){
-        const mw=s.type==='rect'?(h==='tl'?snap.w-s.w:0):0;
+        const mw=h==='tl'?snap.w-s.w:0;
         s.x=snap.x+mw*Math.cos(rot)-moved*Math.sin(rot);
         s.y=snap.y+mw*Math.sin(rot)+moved*Math.cos(rot);
       }
@@ -992,7 +958,6 @@ function onWheel(e){
   document.getElementById('zlv').textContent=Math.round(zoom*100)+'%';render();
 }
 
-// ── TEXT ──
 function setupTextOverlay(){
   const inp=document.getElementById('textInput');
   inp.addEventListener('keydown',e=>{
@@ -1000,12 +965,10 @@ function setupTextOverlay(){
     if(e.key==='Enter'){e.preventDefault();commitText();}
     if(e.key==='Escape'){cancelText();}
   });
-  // do NOT add a global mousedown listener that calls commitText — that caused the stack overflow
-  // We commit on Enter, Escape, or switching tools
 }
 
 function placeText(wp,sp){
-  if(textPending)return; // already open
+  if(textPending)return;
   textPending={wx:wp.x,wy:wp.y};
   const overlay=document.getElementById('textOverlay');
   const inp=document.getElementById('textInput');
@@ -1025,7 +988,7 @@ function commitText(){
   const inp=document.getElementById('textInput');
   const val=inp.value.trim();
   const pending=textPending;
-  cancelText(); // clear state first to avoid re-entrancy
+  cancelText();
   if(val){
     const id=newId();
     shapes.push({id,type:'text',x:pending.wx,y:pending.wy,text:val,
@@ -1044,11 +1007,13 @@ function cancelText(){
 }
 function fontStr(s){return `${s.fontStyle||'normal'} ${s.fontWeight||'normal'} ${s.fontSize||28}px "${s.fontFamily||'Patrick Hand'}"` ;}
 
-// ── RENDER ──
 function render(){
   if(!ctx)return;
   ctx.clearRect(0,0,canvas.width,canvas.height);
   ctx.save();ctx.translate(panX,panY);ctx.scale(zoom,zoom);
+
+  if(exportBound.visible) drawExportBound();
+
   shapes.forEach(s=>{if(s.visible)drawShape(s);});
   if(drawing&&dragShape)drawShape(dragShape);
   if(fhDrawing&&fhPts.length>1){
@@ -1063,20 +1028,16 @@ function render(){
   }
   const sel=shapes.find(s=>s.id===selId);
   if(sel)drawHandles(sel);
-  // snap guidelines
   if(dragging&&sel&&snapOn&&sel.type!=='line'&&sel.type!=='freehand'){
     const b=getBounds(sel);
     ctx.save();
     ctx.strokeStyle='rgba(93,59,189,0.55)';ctx.lineWidth=1/zoom;ctx.setLineDash([4/zoom,3/zoom]);
-    // vertical guideline at left, center, right
     [b.x,b.cx,b.x+b.w].forEach(vx=>{ctx.beginPath();ctx.moveTo(vx,-9999);ctx.lineTo(vx,9999);ctx.stroke();});
-    // horizontal guideline
     [b.y,b.cy,b.y+b.h].forEach(vy=>{ctx.beginPath();ctx.moveTo(-9999,vy);ctx.lineTo(9999,vy);ctx.stroke();});
     ctx.setLineDash([]);ctx.restore();
   }
   ctx.restore();
 
-  // SIZE BADGE — drawn in screen space after the world transform is restored
   const showBadge=(drawing&&dragShape)||resizing;
   if(showBadge){
     const s=resizing?shapes.find(x=>x.id===selId):dragShape;
@@ -1113,6 +1074,38 @@ function drawSizeBadge(sx,sy,label){
   ctx.restore();
 }
 
+function drawExportBound(){
+  const eb=exportBound;
+  ctx.save();
+  ctx.fillStyle='rgba(255,255,255,0.55)';
+  ctx.fillRect(eb.x,eb.y,eb.w,eb.h);
+  ctx.strokeStyle='#1a1a1a';
+  ctx.lineWidth=2/zoom;
+  ctx.setLineDash([6/zoom,4/zoom]);
+  ctx.strokeRect(eb.x,eb.y,eb.w,eb.h);
+  ctx.setLineDash([]);
+  ctx.fillStyle='rgba(93,59,189,0.12)';
+  ctx.fillRect(eb.x,eb.y,eb.w,eb.h);
+  ctx.font=`bold ${11/zoom}px "Architects Daughter",monospace`;
+  ctx.fillStyle='rgba(93,59,189,0.6)';
+  ctx.textBaseline='top';
+  ctx.textAlign='left';
+  ctx.fillText(`Export  ${Math.round(eb.w)} × ${Math.round(eb.h)}`,eb.x+6/zoom,eb.y+4/zoom);
+  const hs=7/zoom;
+  const corners=[{x:eb.x,y:eb.y},{x:eb.x+eb.w/2,y:eb.y},{x:eb.x+eb.w,y:eb.y},{x:eb.x,y:eb.y+eb.h/2},{x:eb.x+eb.w,y:eb.y+eb.h/2},{x:eb.x,y:eb.y+eb.h},{x:eb.x+eb.w/2,y:eb.y+eb.h},{x:eb.x+eb.w,y:eb.y+eb.h}];
+  corners.forEach(c=>{
+    ctx.beginPath();ctx.rect(c.x-hs,c.y-hs,hs*2,hs*2);
+    ctx.fillStyle='#fff';ctx.fill();
+    ctx.strokeStyle='#1a1a1a';ctx.lineWidth=1.5/zoom;ctx.setLineDash([]);ctx.stroke();
+  });
+  ctx.restore();
+}
+
+function updateEbInfo(){
+  const el=document.getElementById('ebInfo');
+  if(el) el.textContent=`${Math.round(exportBound.w)} × ${Math.round(exportBound.h)}`;
+}
+
 function withRotation(s,fn){
   const rot=s.rotation||0;
   if(!rot){fn();return;}
@@ -1140,13 +1133,12 @@ function drawShape(s){
     ctx.fillStyle=s.fill||'#b3d4ff';ctx.fill();
     if(s.sw>0&&s.stroke){ctx.strokeStyle=s.stroke;ctx.lineWidth=s.sw;ctx.stroke();}
   } else if(t==='triangle'){
-    // Vertices exactly filling the bounding box: top-center, bottom-left, bottom-right
     const rx=s.rx||s.r||1, ry=s.ry||s.r||1;
-    const tx=s.x, ty=s.y; // center of bounding box
+    const tx=s.x, ty=s.y;
     ctx.beginPath();
-    ctx.moveTo(tx,        ty - ry);      // top center
-    ctx.lineTo(tx + rx,   ty + ry);      // bottom right
-    ctx.lineTo(tx - rx,   ty + ry);      // bottom left
+    ctx.moveTo(tx, ty-ry);
+    ctx.lineTo(tx+rx, ty+ry);
+    ctx.lineTo(tx-rx, ty+ry);
     ctx.closePath();
     ctx.fillStyle=s.fill||'#b3f0d4';ctx.fill();
     if(s.sw>0&&s.stroke){ctx.strokeStyle=s.stroke;ctx.lineWidth=s.sw;ctx.lineJoin='round';ctx.stroke();}
@@ -1166,9 +1158,13 @@ function drawShape(s){
     const rx=Math.max(1,s.rx||1),ry=Math.max(1,s.ry||1);
     const sa=s.startAngle||0,ea=s.endAngle!=null?s.endAngle:Math.PI;
     ctx.beginPath();
-    // Use ellipse for non-circular arcs
     ctx.ellipse(s.x,s.y,rx,ry,0,sa,ea,false);
-    if(s.fill){ctx.fillStyle=s.fill;ctx.fill();}
+    if(s.fill&&s.fillOn){
+      ctx.lineTo(s.x,s.y);
+      ctx.closePath();
+      ctx.fillStyle=s.fill;ctx.fill();
+      ctx.beginPath();ctx.ellipse(s.x,s.y,rx,ry,0,sa,ea,false);
+    }
     ctx.strokeStyle=s.stroke||'#1a1a1a';ctx.lineWidth=s.sw||4;ctx.lineCap='round';ctx.stroke();
   } else if(t==='freehand'){
     if(!s.pts||s.pts.length<2){ctx.restore();return;}
@@ -1194,17 +1190,14 @@ function drawHandles(s){
     ctx.restore();return;
   }
   if(s.type==='arc'){
-    // Draw dashed bounding ellipse guide + endpoint handles
     const rx=s.rx||1,ry=s.ry||1,sa=s.startAngle||0,ea=s.endAngle!=null?s.endAngle:Math.PI;
     ctx.setLineDash([4/zoom,3/zoom]);ctx.strokeStyle='rgba(0,0,0,0.2)';ctx.lineWidth=1/zoom;
     ctx.beginPath();ctx.ellipse(s.x,s.y,rx,ry,0,0,Math.PI*2);ctx.stroke();
     ctx.setLineDash([]);
-    // Endpoint handles
     [[Math.cos(sa)*rx+s.x,Math.sin(sa)*ry+s.y],[Math.cos(ea)*rx+s.x,Math.sin(ea)*ry+s.y]].forEach(([hx,hy])=>{
       ctx.beginPath();ctx.arc(hx,hy,5/zoom,0,Math.PI*2);
       ctx.fillStyle='#fff0a0';ctx.fill();ctx.strokeStyle='#1a1a1a';ctx.lineWidth=1.5/zoom;ctx.stroke();
     });
-    // Also show resize handles from bounding box
     const b=getBounds(s);
     const rotation=s.rotation||0;
     ctx.save();ctx.translate(b.cx,b.cy);ctx.rotate(rotation);ctx.translate(-b.cx,-b.cy);
@@ -1215,19 +1208,16 @@ function drawHandles(s){
     ctx.restore();return;
   }
   const {scale,rot:rotH,b}=getHandles(s);
-  // dashed bounding box rotated
   const rotation=s.rotation||0;
   ctx.save();
   ctx.translate(b.cx,b.cy);ctx.rotate(rotation);ctx.translate(-b.cx,-b.cy);
   ctx.setLineDash([5/zoom,3/zoom]);ctx.strokeStyle='#1a1a1a';ctx.lineWidth=1.5/zoom;
   ctx.strokeRect(b.x,b.y,b.w,b.h);ctx.setLineDash([]);
   ctx.restore();
-  // scale handles (squares)
   scale.forEach(h=>{
     ctx.beginPath();ctx.rect(h.wx-h.hs,h.wy-h.hs,h.hs*2,h.hs*2);
     ctx.fillStyle='#d4b8f0';ctx.fill();ctx.strokeStyle='#1a1a1a';ctx.lineWidth=1.5/zoom;ctx.stroke();
   });
-  // rotation handle (circle, yellow)
   const tc=scale.find(h=>h.id==='tc');
   if(tc){
     ctx.beginPath();ctx.moveTo(tc.wx,tc.wy);ctx.lineTo(rotH.wx,rotH.wy);
@@ -1238,7 +1228,6 @@ function drawHandles(s){
   ctx.restore();
 }
 
-// ── TOOLBAR ──
 function setupToolbar(){
   document.querySelectorAll('[data-tool]').forEach(b=>b.addEventListener('click',()=>setTool(b.dataset.tool)));
   document.getElementById('delBtn').addEventListener('click',deleteSelected);
@@ -1258,11 +1247,11 @@ function deleteSelected(){
   render();renderLayers();renderProps();renderCode(true);updateInfo();showToast('Deleted');
 }
 
-// ── HEADER ──
 function setupHeader(){
   document.getElementById('newBtn').addEventListener('click',()=>{if(!shapes.length)return;shapes=[];selId=null;saveHistory();render();renderLayers();renderProps();renderCode();updateInfo();showToast('New canvas');});
   document.getElementById('gridBtn').addEventListener('click',function(){gridOn=!gridOn;document.getElementById('grid-overlay').classList.toggle('off',!gridOn);this.classList.toggle('on',gridOn);});
   document.getElementById('snapBtn').addEventListener('click',function(){snapOn=!snapOn;this.classList.toggle('on',snapOn);showToast('Snap '+(snapOn?'on':'off'));});
+  document.getElementById('ebBtn').addEventListener('click',function(){exportBound.visible=!exportBound.visible;this.classList.toggle('on',exportBound.visible);render();});
   document.getElementById('undoBtn').addEventListener('click',undo);
   document.getElementById('redoBtn').addEventListener('click',redo);
   document.getElementById('copyBtn').addEventListener('click',copySelected);
@@ -1286,7 +1275,6 @@ function exportProject(){
   showToast('Exported');
 }
 
-// ── SIDEBAR ──
 function setupSidebar(){
   document.querySelectorAll('.stab').forEach(t=>t.addEventListener('click',()=>activatePanel(t.dataset.panel)));
   document.getElementById('clearBtn').addEventListener('click',()=>{if(!shapes.length)return;shapes=[];selId=null;saveHistory();render();renderLayers();renderProps();renderCode();updateInfo();showToast('Cleared');});
@@ -1301,7 +1289,6 @@ function setupSidebar(){
 function activatePanel(n){document.querySelectorAll('.stab').forEach(t=>t.classList.toggle('act',t.dataset.panel===n));document.querySelectorAll('.spanel').forEach(p=>p.classList.toggle('act',p.id==='panel-'+n));}
 function flashCopy(id,label){const b=document.getElementById(id);b.classList.add('ok');b.textContent='Copied';showToast(label+' copied');setTimeout(()=>{b.classList.remove('ok');b.textContent=label;},2000);}
 
-// ── LAYERS ──
 let dragLayerId=null,dragOverId=null;
 
 function renderLayers(){
@@ -1310,7 +1297,6 @@ function renderLayers(){
     list.innerHTML='<div class="lempty">No shapes yet.<br>Start drawing!</div>';
     return;
   }
-  // Render top-to-bottom = last shape first (topmost visually)
   list.innerHTML=[...shapes].reverse().map(s=>{
     const color=s.fill||s.stroke||'#d4b8f0';
     const name=s.type==='text'
@@ -1328,7 +1314,6 @@ function renderLayers(){
     </div>`;
   }).join('');
 
-  // Click to select
   list.querySelectorAll('.litem').forEach(item=>{
     item.addEventListener('click',e=>{
       if(e.target.closest('[data-vis]')||e.target.closest('[data-del]')) return;
@@ -1338,14 +1323,12 @@ function renderLayers(){
     });
   });
 
-  // Visibility toggle
   list.querySelectorAll('[data-vis]').forEach(b=>b.addEventListener('click',e=>{
     e.stopPropagation();
     const s=shapes.find(x=>x.id===b.dataset.vis);
     if(s){s.visible=!s.visible;render();renderLayers();renderCode(true);}
   }));
 
-  // Delete
   list.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',e=>{
     e.stopPropagation();
     const id=b.dataset.del;
@@ -1355,7 +1338,6 @@ function renderLayers(){
     render();renderLayers();renderProps();renderCode(true);updateInfo();
   }));
 
-  // Drag to reorder
   list.querySelectorAll('.litem').forEach(item=>{
     item.addEventListener('dragstart',e=>{
       dragLayerId=item.dataset.id;
@@ -1376,7 +1358,6 @@ function renderLayers(){
     item.addEventListener('drop',e=>{
       e.preventDefault();
       if(!dragLayerId||dragLayerId===dragOverId) return;
-      // shapes array is bottom-to-top; list is top-to-bottom (reversed)
       const fromIdx=shapes.findIndex(s=>s.id===dragLayerId);
       const toIdx=shapes.findIndex(s=>s.id===dragOverId);
       if(fromIdx===-1||toIdx===-1) return;
@@ -1388,14 +1369,12 @@ function renderLayers(){
   });
 }
 
-// ── PROPS ──
 function renderProps(){
   const cont=document.getElementById('propsContent');
   const s=shapes.find(x=>x.id===selId);
   if(!s){cont.innerHTML='<div class="pempty">Select a shape to edit its props</div>';return;}
   const t=s.type,isLine=t==='line',isFree=t==='freehand',isText=t==='text',isPoly=t==='triangle'||t==='polygon',isArc=t==='arc';
 
-  // position/size section
   let posHTML='';
   if(t==='rect') posHTML=`<div class="p2c"><div class="pf"><div class="pflbl">X</div><input class="pinp" type="number" id="px" value="${Math.round(s.x)}"></div><div class="pf"><div class="pflbl">Y</div><input class="pinp" type="number" id="py" value="${Math.round(s.y)}"></div><div class="pf"><div class="pflbl">W</div><input class="pinp" type="number" id="pw" value="${Math.round(s.w)}"></div><div class="pf"><div class="pflbl">H</div><input class="pinp" type="number" id="ph" value="${Math.round(s.h)}"></div></div>`;
   else if(t==='circle') posHTML=`<div class="p2c"><div class="pf"><div class="pflbl">CX</div><input class="pinp" type="number" id="px" value="${Math.round(s.x)}"></div><div class="pf"><div class="pflbl">CY</div><input class="pinp" type="number" id="py" value="${Math.round(s.y)}"></div><div class="pf"><div class="pflbl">RX</div><input class="pinp" type="number" id="pw" value="${Math.round(s.rx)}"></div><div class="pf"><div class="pflbl">RY</div><input class="pinp" type="number" id="ph" value="${Math.round(s.ry)}"></div></div>`;
@@ -1450,7 +1429,6 @@ function renderProps(){
       ${!isLine&&!isFree&&!isText&&!isArc?`<div class="prow"><div class="prlbl">Shadow</div><input class="pinp" type="range" id="psh" min="0" max="40" value="${s.shadow||0}"><div class="pval" id="pshv">${s.shadow||0}px</div></div>`:''}
     </div>`;
 
-  // helpers
   function num(id,cb){const el=document.getElementById(id);if(!el)return;el.addEventListener('change',()=>{cb(parseFloat(el.value)||0);render();renderLayers();renderCode(true);});}
   function rng(id,vid,unit,cb){const el=document.getElementById(id),vl=document.getElementById(vid);if(!el)return;el.addEventListener('input',()=>{const v=parseFloat(el.value);if(vl)vl.textContent=v+unit;cb(v);render();renderCode(true);});}
   function col(id,cb){const el=document.getElementById(id);if(!el)return;el.addEventListener('input',()=>{cb(el.value);render();renderLayers();renderCode(true);});}
@@ -1492,7 +1470,6 @@ function syncTextInput(){
   if(inp){inp.style.fontFamily=curFont;inp.style.fontSize=curFontSize+'px';inp.style.color=curTextColor;}
 }
 
-// ── CODE GENERATION ──
 function shapeToCss(s){
   const css={};
   css['position']='absolute';
@@ -1520,7 +1497,6 @@ function shapeToCss(s){
     const rx=Math.round(s.rx||s.r||1),ry=Math.round(s.ry||s.r||1);
     css['left']=Math.round(s.x-rx)+'px';css['top']=Math.round(s.y-ry)+'px';
     css['width']=(rx*2)+'px';css['height']=(ry*2)+'px';
-    // Use clip-path for stretched triangles
     css['background']=s.fill||'#b3f0d4';
     css['clip-path']='polygon(50% 0%, 100% 100%, 0% 100%)';
     if(rot)transforms.push('rotate('+Math.round(rot*180/Math.PI)+'deg)');
@@ -1550,7 +1526,7 @@ function shapeToCss(s){
 function shapeToHtml(s){
   if(s.type==='text')return `  <p class="${s.id}">${escAttr(s.text||'')}</p>`;
   if(s.type==='freehand'){
-    if(!s.pts||s.pts.length<2)return`  <!-- freehand empty -->`;
+    if(!s.pts||s.pts.length<2)return`  `;
     let d=`M${Math.round(s.pts[0].x)} ${Math.round(s.pts[0].y)}`;
     for(let i=1;i<s.pts.length;i++){const p=s.pts[i-1],q=s.pts[i],mx=Math.round((p.x+q.x)/2),my=Math.round((p.y+q.y)/2);d+=` Q${Math.round(p.x)} ${Math.round(p.y)} ${mx} ${my}`;}
     return `  <svg class="${s.id}" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none"><path d="${d}" stroke="${s.stroke||'#1a1a1a'}" stroke-width="${s.sw||4}" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="${s.opacity||1}"/></svg>`;
@@ -1594,11 +1570,10 @@ function renderCode(animate){
   if(animate){out.style.outline='2px dashed rgba(0,0,0,.15)';setTimeout(()=>out.style.outline='',300);}
 }
 
-// ── COPY / PASTE / DUPLICATE ──
 function copySelected(){
   const s=shapes.find(x=>x.id===selId);
   if(!s){showToast('Nothing selected');return;}
-  clipboard=JSON.parse(JSON.stringify(s)); // deep clone, all props
+  clipboard=JSON.parse(JSON.stringify(s));
   showToast('Copied');
 }
 
@@ -1634,7 +1609,6 @@ function duplicateSelected(){
   showToast('Duplicated');
 }
 
-// ── KEYBOARD ──
 function setupKeyboard(){
   document.addEventListener('keydown',e=>{
     if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
@@ -1657,7 +1631,6 @@ function setupKeyboard(){
   });
 }
 
-// ── TOAST ──
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('on'),2000);}
 </script>
 </body>
